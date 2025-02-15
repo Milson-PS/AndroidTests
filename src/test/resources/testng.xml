@@ -1,0 +1,7 @@
+<suite name="AppiumTestSuite" parallel="false">
+    <test name="SearchTests">
+        <classes>
+            <class name="tests.AuthTests"/>
+        </classes>
+    </test>
+</suite>
