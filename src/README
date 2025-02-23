@@ -1,0 +1,9 @@
+{
+  "platformName": "Android",
+  "appium:deviceName": "Pixel 6a API 34",
+  "appium:automationName": "UiAutomator2"
+}
+
+
+- Запустить Appium Server
+appium server --base-path /wd/hub

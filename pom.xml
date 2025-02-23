@@ -45,7 +45,6 @@
             <version>${allure.version}</version>
         </dependency>
 
-
         <!-- Apache Commons IO (для работы с файлами) -->
         <dependency>
             <groupId>commons-io</groupId>
@@ -73,6 +72,10 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M7</version>
                 <configuration>
+                    <suiteXmlFiles>
+                        <!-- Указываем путь к testng.xml -->
+                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
                     <systemPropertyVariables>
                         <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                     </systemPropertyVariables>

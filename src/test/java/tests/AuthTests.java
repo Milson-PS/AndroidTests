@@ -1,36 +1,45 @@
 package tests;
 
 import base.TestBase;
+import io.qameta.allure.Allure;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import pages.AuthPage;
 
 public class AuthTests extends TestBase {
+    private AuthPage authPage;
+
+    @BeforeMethod
+    public void setupPage() {
+        authPage = new AuthPage(driver);
+    }
+
     @Test
     public void successfulAuthTest() {
-        AuthPage authPage = new AuthPage(driver);
+        Allure.step("Начало теста успешной авторизации");
 
-        // Отказываемся от уведомлений
-        authPage.dontAllowButton();
+        authPage
+                .dontAllowButton()
+                .selectCity()
+                .openProfileTab()
+                .clickLoginButton()
+                .clearPhoneNumber()
+                .enterPhoneNumber("79351111360")
+                .clearPhoneNumber()
+                .enterPhoneNumber("89351111360")
+                .clearPhoneNumber()
+                .pastePhoneNumber("79351111360")
+                .clearPhoneNumber()
+                .pastePhoneNumber("89351111360")
+                .clearPhoneNumberButKeepPlus7()
+                .pastePhoneNumber("92351111360")
+                .clearPhoneNumber()
+                .enterPhoneNumber("79351111360");
+        Allure.step("Проверка успешной авторизации");
+        Assert.assertTrue(authPage.isGetSmsCodeButtonEnabled(), "Кнопка получения SMS кода должна быть включена.");
+        authPage.clickGetSmsCodeButton().enterSmsCode("1111");
 
-        // Выбираем город
-        authPage.selectCity();
-
-        // Переходим в Профиль
-        authPage.openProfileTab();
-
-        // Нажимаем на кнопку "Войти или зарегистрироваться"
-        authPage.clickLoginButton();
-
-        // Вводим номер телефона и получаем смс код
-        authPage.clearPhoneNumber();
-        authPage.enterPhoneNumber("79351111360"); // Вводим номер телефона
-        authPage.clickGetSmsCodeButton(); // Получаем код
-
-        // Вводим код из SMS "1111"
-        authPage.enterSmsCode("1111");
-
-        // Проверяем, что авторизация успешна
-        Assert.assertTrue(authPage.isAuthSuccessful(), "Ошибка авторизации: не найден элемент с информацией о телефоне.");
+        Assert.assertTrue(authPage.isAuthSuccessful(), "Авторизация не выполнена, элемент информации о телефоне не найден.");
     }
 }

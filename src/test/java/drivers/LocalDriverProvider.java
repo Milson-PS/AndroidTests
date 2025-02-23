@@ -1,9 +1,12 @@
 package drivers;
-
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
+import io.qameta.allure.Allure;
+import org.openqa.selenium.MutableCapabilities;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -16,33 +19,50 @@ public class LocalDriverProvider {
         UiAutomator2Options options = new UiAutomator2Options()
                 .setAutomationName(ANDROID_UIAUTOMATOR2)
                 .setPlatformName(ANDROID)
-                .setPlatformVersion("14.0")  // Убедитесь, что версия Android корректна
-                .setDeviceName("Pixel 6a API 34")  // Проверьте имя устройства через ADB
+                .setPlatformVersion("14.0")
+                .setDeviceName("Pixel 6a API 34")
                 .setApp(getAppPath())
                 .setAppPackage("ru.citilink.develop")
                 .setAppActivity("ru.citilink.app.presentation.mainactivity.MainActivity");
+
+        // Явное приведение к MutableCapabilities для использования setCapability
+        MutableCapabilities mutableOptions = (MutableCapabilities) options;
+        mutableOptions.setCapability("appium:video", true);
+        mutableOptions.setCapability("appium:videoName", "test_video.mp4");
 
         return new AndroidDriver(getAppiumServerUrl(), options);
     }
 
     public static URL getAppiumServerUrl() {
         try {
-            return new URL("http://localhost:4723/wd/hub");  // Убедитесь, что сервер работает
+            return new URL("http://localhost:4723/wd/hub");
         } catch (MalformedURLException e) {
-            throw new RuntimeException("Invalid Appium server URL", e);
+            throw new RuntimeException("Неверный URL Appium сервера", e);
         }
     }
 
     private static String getAppPath() {
-        // Укажите путь к вашему локальному APK-файлу
-        String appName = "app-alpha-universal-release.apk"; // Имя вашего APK-файла
+        String appName = "app-alpha-universal-release.apk";
         String appPath = "src/test/resources/apps/" + appName;
         File app = new File(appPath);
 
         if (!app.exists()) {
-            throw new RuntimeException("APK file not found at: " + app.getAbsolutePath());
+            throw new RuntimeException("APK файл не найден по пути: " + app.getAbsolutePath());
         }
-
         return app.getAbsolutePath();
+    }
+
+    // Метод для прикрепления видео в отчет Allure
+    public static void attachVideoToAllure(String videoPath) {
+        File video = new File(videoPath);
+        if (video.exists()) {
+            try (InputStream is = new FileInputStream(video)) {
+                Allure.addAttachment("Test Video", "video/mp4", is, ".mp4");
+            } catch (Exception e) {
+                System.out.println("Не удалось прикрепить видео: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Видео не найдено: " + videoPath);
+        }
     }
 }

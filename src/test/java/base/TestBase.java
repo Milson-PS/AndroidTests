@@ -1,10 +1,13 @@
 package base;
 
-import com.google.common.collect.ImmutableMap;
 import drivers.LocalDriverProvider;
 import io.appium.java_client.android.AndroidDriver;
+import io.qameta.allure.Allure;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+
+import java.io.ByteArrayInputStream;
+import java.util.Base64;
 
 public class TestBase {
     protected AndroidDriver driver;
@@ -12,34 +15,19 @@ public class TestBase {
     @BeforeMethod
     public void setUp() {
         driver = LocalDriverProvider.createDriver();
-        disableNotifications();  // Отключаем уведомления
-        dismissNotifications();   // Скрываем панель уведомлений
+        // Запуск видео записи
+        driver.startRecordingScreen();
     }
 
     @AfterMethod
     public void tearDown() {
         if (driver != null) {
+            // Останавливаем запись и получаем видео в Base64
+            String videoBase64 = driver.stopRecordingScreen();
+            byte[] videoBytes = Base64.getDecoder().decode(videoBase64);
+            // Прикрепляем видео к Allure отчету
+            Allure.addAttachment("Test Video", "video/mp4", new ByteArrayInputStream(videoBytes), ".mp4");
             driver.quit();
-        }
-    }
-
-    // Метод для отключения уведомлений
-    private void disableNotifications() {
-        try {
-            driver.executeScript("mobile: shell", ImmutableMap.of("command", "settings put global heads_up_notifications_enabled 0"));
-            System.out.println("Уведомления отключены.");
-        } catch (Exception e) {
-            System.out.println("Не удалось отключить уведомления: " + e.getMessage());
-        }
-    }
-
-    // Метод для скрытия панели уведомлений
-    private void dismissNotifications() {
-        try {
-            driver.executeScript("mobile: shell", ImmutableMap.of("command", "cmd statusbar collapse"));
-            System.out.println("Панель уведомлений скрыта.");
-        } catch (Exception e) {
-            System.out.println("Не удалось скрыть панель уведомлений: " + e.getMessage());
         }
     }
 }
