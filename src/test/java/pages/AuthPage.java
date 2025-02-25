@@ -5,6 +5,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 
 import java.time.Duration;
 
@@ -157,4 +158,18 @@ public class AuthPage {
         phoneField.sendKeys("+7");
         return this;
     }
+    public AuthPage loginAsDefaultUser() {
+        dontAllowButton()
+                .selectCity()
+                .openProfileTab()
+                .clickLoginButton()
+                .clearPhoneNumber()
+                .enterPhoneNumber("79351111360")
+                .clickGetSmsCodeButton()
+                .enterSmsCode("1111");
+
+        Assert.assertTrue(isAuthSuccessful(), "Авторизация не выполнена");
+        return this;
+    }
+
 }

@@ -2,7 +2,6 @@ package tests;
 
 import base.TestBase;
 import io.qameta.allure.Allure;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import pages.AuthPage;
@@ -27,9 +26,7 @@ public class UnauthorizedUserOrderTests extends TestBase {
     @Test
     public void NoAuthOrderUserTest() {
         Allure.step("1. Начало теста заказа неавторизованного пользователя");
-        authPage
-                .dontAllowButton()
-                .selectCity();
+        authPage.dontAllowButton().selectCity();
 
         Allure.step("2. Добавление первого товара в корзину");
         searchPage.searchProduct("1472159");
@@ -45,33 +42,52 @@ public class UnauthorizedUserOrderTests extends TestBase {
         Allure.step("4. Переход в корзину");
         cartPage.goToCart();
 
-      //  Allure.step("5. Проверка количества товаров в корзине");
-        //int itemCount = cartPage.getCartItemCount();
-        //Assert.assertEquals(itemCount, 2, "В корзине должно быть 2 товара");
-
-        Allure.step("6. Оформление заказа");
+        Allure.step("5. Оформление заказа");
         cartPage.proceedToCheckout();
         cartPage.continueAsGuest();
 
-        Allure.step("7. Выбор адреса самовывоза");
+        Allure.step("6. Выбор адреса самовывоза");
         cartPage.selectPickupAddress();
 
-        Allure.step("8. Нажатие кнопки 'Список'");
+        Allure.step("7. Нажатие кнопки 'Список'");
         cartPage.clickListButton();
 
-        Allure.step("9. Выбор пункта самовывоза");
+        Allure.step("8. Выбор пункта самовывоза");
         cartPage.selectPickupPoint();
 
-        Allure.step("10. Выбор метода оплаты банковской картой");
+        Allure.step("9. Выбор метода оплаты банковской картой");
         cartPage.selectBankCardPayment();
 
-        Allure.step("11. Нажатие кнопки 'Оформить заказ'");
+        Allure.step("10. Ввод email");
+        cartPage.enterEmail("mps7017@yandex.ru");
+
+        Allure.step("11. Добавление контактных данных");
+        cartPage.clickAddContactDataButton();
+        cartPage.enterFirstName("Андрей");
+        cartPage.enterLastName("Пупкин");
+        cartPage.enterPhoneNumber("+79123456789");
+
+        // Нажатие кнопки "Сохранить"
+        Allure.step("12. Сохранение контактных данных");
+        cartPage.clickSaveContactData();  // Убедитесь, что кнопка "Сохранить" теперь нажимается корректно.
+
+        // Подтверждение данных
+        Allure.step("13. Подтверждение данных");
+        cartPage.selectRadioButton();  // Кликаем на радиокнопку подтверждения данных.
+
+        // Оформление заказа
+        Allure.step("14. Оформление заказа");
         cartPage.placeOrder();
 
-        Allure.step("12. Завершение теста");
+        Allure.step("15. Завершение теста");
     }
 }
-        //Добавление товара в корзину
+
+
+
+
+
+//Добавление товара в корзину
         // Нажимаем на кнопку поиск (метод Base page) //android.view.ViewGroup[@resource-id="ru.citilink.develop:id/toolbar"] (resource-id ru.citilink.develop:id/toolbar)
         // Вставляем номер товара 1924513 //android.widget.EditText[@resource-id="ru.citilink.develop:id/editTextSearchToolbar"] resource-id ru.citilink.develop:id/editTextSearchToolbar
         // Кликаем на появившийся товар //androidx.recyclerview.widget.RecyclerView[@resource-id="ru.citilink.develop:id/recyclerViewSuggestedProducts"]/android.view.ViewGroup[1]

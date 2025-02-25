@@ -2,6 +2,8 @@
     <test name="SearchTests">
         <classes>
             <class name="tests.AuthTests"/>
+            <class name="tests.AddAddressTests"/>
+            <class name="tests.UnauthorizedUserOrderTests"/>
         </classes>
     </test>
 </suite>
