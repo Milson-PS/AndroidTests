@@ -14,10 +14,9 @@ public class CartPage {
 
     public CartPage(AndroidDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(60)); // Увеличен таймаут до 60 секунд
     }
 
-    // Прокрутка до поля email
     private void scrollToEmailField() {
         driver.findElement(AppiumBy.androidUIAutomator(
                 "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().resourceId(\"ru.citilink.develop:id/editTextOrderingPaymentEmail\"))"
@@ -81,13 +80,11 @@ public class CartPage {
     }
 
     public CartPage enterEmail(String email) {
-        // Прокручиваем до поля email
         scrollToEmailField();
-
         WebElement emailField = wait.until(
                 ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/editTextOrderingPaymentEmail"))
         );
-        emailField.clear();  // Очистим поле, если там что-то есть
+        emailField.clear();
         emailField.sendKeys(email);
         return this;
     }
@@ -125,7 +122,6 @@ public class CartPage {
     }
 
     public CartPage clickSaveContactData() {
-        // Ждём появления кнопки "Сохранить" и кликаем по ней
         WebElement saveButton = wait.until(
                 ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonSave"))
         );
@@ -134,19 +130,21 @@ public class CartPage {
     }
 
     public CartPage selectRadioButton() {
-        WebElement radioButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.RadioButton[@resource-id='ru.citilink.develop:id/radioButtonName' and @text='Подтверждаю данные']"))
-        );
-        radioButton.click();
-        return this;
-    }
+        driver.findElement(AppiumBy.androidUIAutomator(
+                "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(" +
+                        "new UiSelector().resourceId(\"ru.citilink.develop:id/radioButtonName\"))"
+        ));
 
-    // Новый шаг: Подтверждение данных перед оформлением заказа
-    public CartPage confirmDataAndProceed() {
-        WebElement confirmButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonConfirmData"))
+        WebElement radioButton = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        AppiumBy.xpath(
+                                "//android.widget.RadioButton[@resource-id='ru.citilink.develop:id/radioButtonName']"
+                        )
+                )
         );
-        confirmButton.click();
+
+        System.out.println("Найден элемент: " + radioButton.getText());
+        radioButton.click();
         return this;
     }
 
@@ -158,7 +156,72 @@ public class CartPage {
         return this;
     }
 
-    // Метод для ожидания видимости элемента
+    public CartPage waitForPaymentPageToLoad() {
+        try {
+            System.out.println("Ожидание загрузки страницы оплаты...");
+            WebElement payButton = wait.until(
+                    ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonFooterPay"))
+            );
+            System.out.println("Страница оплаты загружена.");
+            return this;
+        } catch (Exception e) {
+            System.out.println("Ошибка при ожидании загрузки страницы оплаты: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public CartPage enterCardDetails(String cardNumber, String expMonth, String expYear, String cvc) {
+        try {
+            WebElement cardNumberField = wait.until(
+                    ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.EditText[@resource-id='root']/android.view.View[2]/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[2]/android.widget.EditText"))
+            );
+            System.out.println("Поле для ввода номера карты найдено.");
+            cardNumberField.sendKeys(cardNumber);
+
+            WebElement expMonthField = wait.until(
+                    ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.EditText[@resource-id='root']/android.view.View[2]/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[4]/android.view.View/android.widget.EditText"))
+            );
+            System.out.println("Поле для ввода месяца найдено.");
+            expMonthField.sendKeys(expMonth);
+
+            WebElement expYearField = wait.until(
+                    ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.EditText[@resource-id='root']/android.view.View[2]/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[5]/android.view.View/android.widget.EditText"))
+            );
+            System.out.println("Поле для ввода года найдено.");
+            expYearField.sendKeys(expYear);
+
+            WebElement cvcField = wait.until(
+                    ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.EditText[@resource-id='root']/android.view.View/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[7]/android.widget.EditText"))
+            );
+            System.out.println("Поле для ввода CVC найдено.");
+            cvcField.sendKeys(cvc);
+
+            WebElement checkbox = wait.until(
+                    ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.CheckBox[@text='I allow debiting money automatically']"))
+            );
+            System.out.println("Чекбокс найден.");
+            checkbox.click();
+        } catch (Exception e) {
+            System.out.println("Ошибка при заполнении данных карты: " + e.getMessage());
+            throw e;
+        }
+        return this;
+    }
+
+    public CartPage confirmPayment() {
+        try {
+            WebElement payButton = wait.until(
+                    ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.Button[@text='Pay 2999₽']"))
+            );
+            System.out.println("Кнопка оплаты найдена.");
+            payButton.click();
+        } catch (Exception e) {
+            System.out.println("Ошибка при подтверждении оплаты: " + e.getMessage());
+            throw e;
+        }
+        return this;
+    }
+
     public CartPage waitForElementToBeVisible(String elementId) {
         wait.until(
                 ExpectedConditions.visibilityOfElementLocated(AppiumBy.id(elementId))

@@ -26,13 +26,34 @@ public class AuthPage {
         return this;
     }
 
+
     public AuthPage selectCity() {
+        // Ожидаем, пока кнопка "Нет" (android:id/button2) станет кликабельной
         WebElement noButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.Button[@resource-id='android:id/button1']"))
+                ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.Button[@resource-id='android:id/button2']"))
         );
+        // Нажимаем на кнопку "Нет"
         noButton.click();
+
+        // Ожидаем, пока появится список городов (RecyclerView с городами)
+        WebElement cityList = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(AppiumBy.xpath("//androidx.recyclerview.widget.RecyclerView[@resource-id='ru.citilink.develop:id/recyclerViewSelectCity']"))
+        );
+
+        // Ищем элемент с текстом "Москва"
+        WebElement moscowCity = cityList.findElement(AppiumBy.xpath("//android.widget.LinearLayout//android.widget.TextView[@text='Москва']"));
+        if (moscowCity != null) {
+            // Нажимаем на "Москва"
+            moscowCity.click();
+        } else {
+            // Если не найдено, выводим ошибку
+            System.out.println("Город Москва не найден!");
+        }
+
         return this;
     }
+
+
 
     public AuthPage openProfileTab() {
         WebElement profileTab = wait.until(

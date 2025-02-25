@@ -25,65 +25,81 @@ public class UnauthorizedUserOrderTests extends TestBase {
 
     @Test
     public void NoAuthOrderUserTest() {
-        Allure.step("1. Начало теста заказа неавторизованного пользователя");
-        authPage.dontAllowButton().selectCity();
+        try {
+            Allure.step("1. Начало теста заказа неавторизованного пользователя");
+            authPage.dontAllowButton().selectCity();
 
-        Allure.step("2. Добавление первого товара в корзину");
-        searchPage.searchProduct("1472159");
-        productPage.addToCart();
+            Allure.step("2. Добавление первого товара в корзину");
+            searchPage.searchProduct("1472159");
+            productPage.addToCart();
 
-        Allure.step("2.1. Возврат на главную страницу");
-        searchPage.goToHomePage();
+            Allure.step("2.1. Возврат на главную страницу");
+            searchPage.goToHomePage();
 
-        Allure.step("3. Добавление второго товара в корзину");
-        searchPage.searchProduct("1115507");
-        productPage.addToCart();
+            Allure.step("3. Добавление второго товара в корзину");
+            searchPage.searchProduct("1115507");
+            productPage.addToCart();
 
-        Allure.step("4. Переход в корзину");
-        cartPage.goToCart();
+            Allure.step("4. Переход в корзину");
+            cartPage.goToCart();
 
-        Allure.step("5. Оформление заказа");
-        cartPage.proceedToCheckout();
-        cartPage.continueAsGuest();
+            Allure.step("5. Оформление заказа");
+            cartPage.proceedToCheckout();
+            cartPage.continueAsGuest();
 
-        Allure.step("6. Выбор адреса самовывоза");
-        cartPage.selectPickupAddress();
+            Allure.step("6. Выбор адреса самовывоза");
+            cartPage.selectPickupAddress();
 
-        Allure.step("7. Нажатие кнопки 'Список'");
-        cartPage.clickListButton();
+            Allure.step("7. Нажатие кнопки 'Список'");
+            cartPage.clickListButton();
 
-        Allure.step("8. Выбор пункта самовывоза");
-        cartPage.selectPickupPoint();
+            Allure.step("8. Выбор пункта самовывоза");
+            cartPage.selectPickupPoint();
 
-        Allure.step("9. Выбор метода оплаты банковской картой");
-        cartPage.selectBankCardPayment();
+            Allure.step("9. Выбор метода оплаты банковской картой");
+            cartPage.selectBankCardPayment();
 
-        Allure.step("10. Ввод email");
-        cartPage.enterEmail("mps7017@yandex.ru");
+            Allure.step("10. Ввод email");
+            cartPage.enterEmail("mps7017@yandex.ru");
 
-        Allure.step("11. Добавление контактных данных");
-        cartPage.clickAddContactDataButton();
-        cartPage.enterFirstName("Андрей");
-        cartPage.enterLastName("Пупкин");
-        cartPage.enterPhoneNumber("+79123456789");
+            Allure.step("11. Добавление контактных данных");
+            cartPage.clickAddContactDataButton();
+            cartPage.enterFirstName("Андрей");
+            cartPage.enterLastName("Пупкин");
+            cartPage.enterPhoneNumber("+79123456789");
 
-        // Нажатие кнопки "Сохранить"
-        Allure.step("12. Сохранение контактных данных");
-        cartPage.clickSaveContactData();  // Убедитесь, что кнопка "Сохранить" теперь нажимается корректно.
+            Allure.step("12. Сохранение контактных данных");
+            cartPage.clickSaveContactData();
 
-        // Подтверждение данных
-        Allure.step("13. Подтверждение данных");
-        cartPage.selectRadioButton();  // Кликаем на радиокнопку подтверждения данных.
+            Allure.step("13. Подтверждение данных");
+            cartPage.selectRadioButton();
 
-        // Оформление заказа
-        Allure.step("14. Оформление заказа");
-        cartPage.placeOrder();
+            Allure.step("14. Оформление заказа");
+            cartPage.placeOrder();
 
-        Allure.step("15. Завершение теста");
+            Allure.step("15. Подтверждение данных");
+            cartPage.selectRadioButton();
+
+            Allure.step("14. Оформление заказа");
+            cartPage.placeOrder();
+
+
+            Allure.step("15. Ожидание загрузки страницы оплаты");
+            cartPage.waitForPaymentPageToLoad();
+
+            Allure.step("16. Заполнение данных карты");
+            cartPage.enterCardDetails("4111 1111 1111 1111", "12", "2025", "123");
+
+            Allure.step("17. Подтверждение оплаты");
+            cartPage.confirmPayment();
+
+            Allure.step("18. Завершение теста");
+        } catch (Exception e) {
+            Allure.step("Тест завершился с ошибкой: " + e.getMessage());
+            throw e;
+        }
     }
 }
-
-
 
 
 
