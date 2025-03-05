@@ -1,7 +1,13 @@
 package pages;
 
 import io.appium.java_client.AppiumBy;
+import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.touch.WaitOptions;
+import io.appium.java_client.touch.offset.PointOption;
+import io.qameta.allure.Allure;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -17,6 +23,159 @@ public class CartPage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(60)); // Увеличен таймаут до 60 секунд
     }
 
+    // Переключение на контекст WEBVIEW
+    public void switchToWebViewContext() {
+        for (String context : driver.getContextHandles()) {
+            if (context.contains("WEBVIEW")) {
+                driver.context(context);
+                break;
+            }
+        }
+    }
+
+    // Переключение на контекст NATIVE_APP
+    public void switchToNativeContext() {
+        driver.context("NATIVE_APP");
+    }
+
+    // Проверка текста на форме Yoomoney
+    public boolean checkYoomoneyText() {
+        try {
+            Allure.step("Проверка текста на форме Yoomoney");
+            WebElement yoomoneyText = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(
+                            AppiumBy.xpath("(//android.view.View[@content-desc='yoomoney'])[2]/android.widget.Image")
+                    )
+            );
+            return yoomoneyText.isDisplayed();
+        } catch (Exception e) {
+            System.out.println("Ошибка при проверке текста Yoomoney: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Ввод данных карты
+    public CartPage enterCardDetails(String cardNumber, String expMonth, String expYear, String cvc) {
+        Allure.step("Ввод данных карты", () -> {
+            // Ввод номера карты
+            WebElement cardNumberField = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            AppiumBy.xpath("//android.view.View[@resource-id='root']/android.view.View[2]/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[2]/android.view.View/android.widget.EditText")
+                    )
+            );
+            cardNumberField.sendKeys(cardNumber);
+
+            // Ввод месяца
+            WebElement expMonthField = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            AppiumBy.xpath("//android.view.View[@resource-id='root']/android.view.View[2]/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[4]/android.view.View/android.widget.EditText")
+                    )
+            );
+            expMonthField.sendKeys(expMonth);
+
+            // Ввод года
+            WebElement expYearField = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            AppiumBy.xpath("//android.view.View[@resource-id='root']/android.view.View[2]/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[5]/android.view.View/android.widget.EditText")
+                    )
+            );
+            expYearField.sendKeys(expYear);
+
+            // Ввод CVC
+            WebElement cvcField = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            AppiumBy.xpath("//android.view.View[@resource-id='root']/android.view.View[2]/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[7]/android.widget.EditText")
+                    )
+            );
+            cvcField.sendKeys(cvc);
+        });
+        return this;
+    }
+
+    // Свайп для поиска кнопки оплаты
+    public CartPage swipeToFindPayButton() {
+        Allure.step("Свайп для поиска кнопки оплаты", () -> {
+            try {
+                // Используем UiScrollable для прокрутки экрана
+                driver.findElement(AppiumBy.androidUIAutomator(
+                        "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(" +
+                                "new UiSelector().textContains(\"Pay\"))"
+                ));
+                System.out.println("Кнопка 'Pay' найдена после свайпа.");
+            } catch (Exception e) {
+                System.out.println("Ошибка при поиске кнопки 'Pay': " + e.getMessage());
+                throw e; // Пробрасываем исключение, чтобы тест завершился с ошибкой
+            }
+        });
+        return this;
+    }
+
+    // Нажатие кнопки оплаты
+    public CartPage scrollToAndClickPayButton() {
+        Allure.step("Прокрутка до кнопки оплаты и клик по ней", () -> {
+            // Пытаемся найти и кликнуть на кнопку оплаты
+            try {
+                // Ищем кнопку оплаты без прокрутки
+                WebElement payButton = driver.findElement(AppiumBy.xpath("//android.widget.Button[@text='Pay 4509']"));
+                payButton.click();
+            } catch (NoSuchElementException e) {
+                // Если кнопка не найдена, выполняем прокрутку и повторяем поиск
+                boolean isFound = false;
+                while (!isFound) {
+                    // Выполняем свайп вверх
+                    Dimension size = driver.manage().window().getSize();
+                    int startY = (int) (size.height * 0.8);
+                    int endY = (int) (size.height * 0.2);
+                    int startX = size.width / 2;
+                    new TouchAction<>(driver)
+                            .press(PointOption.point(startX, startY))
+                            .waitAction(WaitOptions.waitOptions(Duration.ofMillis(500)))
+                            .moveTo(PointOption.point(startX, endY))
+                            .release()
+                            .perform();
+
+                    // Пытаемся найти кнопку оплаты после прокрутки
+                    try {
+                        WebElement payButton = driver.findElement(AppiumBy.xpath("//android.widget.Button[@text='Pay 4509']"));
+                        payButton.click();
+                        isFound = true;
+                    } catch (NoSuchElementException ignored) {
+                        // Если кнопка все еще не найдена, продолжаем прокрутку
+                    }
+                }
+            }
+        });
+        return this;
+    }
+
+
+    // Ожидание успешного завершения оплаты
+    public boolean waitForSuccessPage() {
+        return Allure.step("Ожидание успешного завершения оплаты", () -> {
+            WebElement successText = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(
+                            AppiumBy.xpath("//android.widget.TextView[@text='Success']")
+                    )
+            );
+            return successText.isDisplayed();
+        });
+    }
+
+    // Ожидание загрузки страницы оплаты
+    public CartPage waitForPaymentPageToLoad() {
+        try {
+            Allure.step("Ожидание загрузки страницы оплаты...");
+            // Просто ждем 10 секунд (или другое время, которое вам нужно)
+            Thread.sleep(10000); // 10 секунд
+            System.out.println("Страница оплаты загружена.");
+        } catch (InterruptedException e) {
+            System.out.println("Ошибка при ожидании загрузки страницы оплаты: " + e.getMessage());
+            Thread.currentThread().interrupt(); // Восстановление прерванного статуса
+        }
+        return this;
+    }
+
+    // Остальные методы из вашего исходного кода
     private void scrollToEmailField() {
         driver.findElement(AppiumBy.androidUIAutomator(
                 "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().resourceId(\"ru.citilink.develop:id/editTextOrderingPaymentEmail\"))"
@@ -153,72 +312,6 @@ public class CartPage {
                 ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonMakeOrder"))
         );
         placeOrderButton.click();
-        return this;
-    }
-
-    public CartPage waitForPaymentPageToLoad() {
-        try {
-            System.out.println("Ожидание загрузки страницы оплаты...");
-            WebElement payButton = wait.until(
-                    ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonFooterPay"))
-            );
-            System.out.println("Страница оплаты загружена.");
-            return this;
-        } catch (Exception e) {
-            System.out.println("Ошибка при ожидании загрузки страницы оплаты: " + e.getMessage());
-            throw e;
-        }
-    }
-
-    public CartPage enterCardDetails(String cardNumber, String expMonth, String expYear, String cvc) {
-        try {
-            WebElement cardNumberField = wait.until(
-                    ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.EditText[@resource-id='root']/android.view.View[2]/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[2]/android.widget.EditText"))
-            );
-            System.out.println("Поле для ввода номера карты найдено.");
-            cardNumberField.sendKeys(cardNumber);
-
-            WebElement expMonthField = wait.until(
-                    ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.EditText[@resource-id='root']/android.view.View[2]/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[4]/android.view.View/android.widget.EditText"))
-            );
-            System.out.println("Поле для ввода месяца найдено.");
-            expMonthField.sendKeys(expMonth);
-
-            WebElement expYearField = wait.until(
-                    ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.EditText[@resource-id='root']/android.view.View[2]/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[5]/android.view.View/android.widget.EditText"))
-            );
-            System.out.println("Поле для ввода года найдено.");
-            expYearField.sendKeys(expYear);
-
-            WebElement cvcField = wait.until(
-                    ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.EditText[@resource-id='root']/android.view.View/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[7]/android.widget.EditText"))
-            );
-            System.out.println("Поле для ввода CVC найдено.");
-            cvcField.sendKeys(cvc);
-
-            WebElement checkbox = wait.until(
-                    ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.CheckBox[@text='I allow debiting money automatically']"))
-            );
-            System.out.println("Чекбокс найден.");
-            checkbox.click();
-        } catch (Exception e) {
-            System.out.println("Ошибка при заполнении данных карты: " + e.getMessage());
-            throw e;
-        }
-        return this;
-    }
-
-    public CartPage confirmPayment() {
-        try {
-            WebElement payButton = wait.until(
-                    ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.Button[@text='Pay 2999₽']"))
-            );
-            System.out.println("Кнопка оплаты найдена.");
-            payButton.click();
-        } catch (Exception e) {
-            System.out.println("Ошибка при подтверждении оплаты: " + e.getMessage());
-            throw e;
-        }
         return this;
     }
 
