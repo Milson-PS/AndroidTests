@@ -91,10 +91,12 @@ public class UnauthorizedUserOrderTests extends TestBase {
             Allure.step("18. Ввод данных карты");
             cartPage.enterCardDetails("4111 1111 1111 1111", "12", "25", "123");
 
+            Allure.step("19. Свайп для поиска кнопки оплаты");
+            cartPage.scrollToPayButton(); // Прокручиваем экран, чтобы кнопка стала видимой
 
             Allure.step("20. Нажатие кнопки оплаты");
-            cartPage.scrollToAndClickPayButton();
-
+            cartPage.clickPayButton(); // Нажимаем на кнопку "Pay"
+        //    cartPage.scrollToAndClickPayButton();
             Allure.step("21. Ожидание успешного завершения оплаты");
             boolean isSuccess = cartPage.waitForSuccessPage();
             if (isSuccess) {

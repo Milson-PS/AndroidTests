@@ -1,18 +1,18 @@
 package pages;
 
 import io.appium.java_client.AppiumBy;
-import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.touch.WaitOptions;
-import io.appium.java_client.touch.offset.PointOption;
 import io.qameta.allure.Allure;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.PointerInput;
+import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.Collections;
 
 public class CartPage {
     private final AndroidDriver driver;
@@ -31,11 +31,6 @@ public class CartPage {
                 break;
             }
         }
-    }
-
-    // Переключение на контекст NATIVE_APP
-    public void switchToNativeContext() {
-        driver.context("NATIVE_APP");
     }
 
     // Проверка текста на форме Yoomoney
@@ -92,57 +87,62 @@ public class CartPage {
         return this;
     }
 
-    // Свайп для поиска кнопки оплаты
-    public CartPage swipeToFindPayButton() {
-        Allure.step("Свайп для поиска кнопки оплаты", () -> {
+
+    public CartPage clickPayButton() {
+        Allure.step("Нажатие кнопки оплаты", () -> {
             try {
-                // Используем UiScrollable для прокрутки экрана
-                driver.findElement(AppiumBy.androidUIAutomator(
-                        "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(" +
-                                "new UiSelector().textContains(\"Pay\"))"
-                ));
-                System.out.println("Кнопка 'Pay' найдена после свайпа.");
+                WebElement payButton = wait.until(
+                        ExpectedConditions.elementToBeClickable(
+                                AppiumBy.xpath("//android.widget.Button[contains(@text, 'Pay')]")
+                        )
+                );
+                Thread.sleep(1000); // Пауза для уверенности
+                payButton.click();
+                System.out.println("Кнопка 'Pay' успешно нажата.");
             } catch (Exception e) {
-                System.out.println("Ошибка при поиске кнопки 'Pay': " + e.getMessage());
-                throw e; // Пробрасываем исключение, чтобы тест завершился с ошибкой
+                System.out.println("Ошибка при нажатии кнопки 'Pay': " + e.getMessage());
+                throw e;
             }
         });
         return this;
     }
 
-    // Нажатие кнопки оплаты
-    public CartPage scrollToAndClickPayButton() {
-        Allure.step("Прокрутка до кнопки оплаты и клик по ней", () -> {
-            // Пытаемся найти и кликнуть на кнопку оплаты
-            try {
-                // Ищем кнопку оплаты без прокрутки
-                WebElement payButton = driver.findElement(AppiumBy.xpath("//android.widget.Button[@text='Pay 4509']"));
-                payButton.click();
-            } catch (NoSuchElementException e) {
-                // Если кнопка не найдена, выполняем прокрутку и повторяем поиск
-                boolean isFound = false;
-                while (!isFound) {
-                    // Выполняем свайп вверх
+
+    public CartPage scrollToPayButton() {
+        Allure.step("Прокрутка до кнопки оплаты", () -> {
+            int maxAttempts = 5;
+            int attempts = 0;
+            boolean isFound = false;
+
+            while (!isFound && attempts < maxAttempts) {
+                try {
+                    WebElement payButton = driver.findElement(AppiumBy.xpath("//android.widget.Button[contains(@text, 'Pay')]"));
+                    if (payButton.isDisplayed()) {
+                        isFound = true;
+                        System.out.println("Кнопка 'Pay' найдена после прокрутки.");
+                    }
+                } catch (NoSuchElementException e) {
+                    attempts++;
+                    System.out.println("Попытка " + attempts + ": Кнопка 'Pay' не найдена. Выполняем прокрутку...");
+
                     Dimension size = driver.manage().window().getSize();
+                    int startX = size.width / 2;
                     int startY = (int) (size.height * 0.8);
                     int endY = (int) (size.height * 0.2);
-                    int startX = size.width / 2;
-                    new TouchAction<>(driver)
-                            .press(PointOption.point(startX, startY))
-                            .waitAction(WaitOptions.waitOptions(Duration.ofMillis(500)))
-                            .moveTo(PointOption.point(startX, endY))
-                            .release()
-                            .perform();
 
-                    // Пытаемся найти кнопку оплаты после прокрутки
-                    try {
-                        WebElement payButton = driver.findElement(AppiumBy.xpath("//android.widget.Button[@text='Pay 4509']"));
-                        payButton.click();
-                        isFound = true;
-                    } catch (NoSuchElementException ignored) {
-                        // Если кнопка все еще не найдена, продолжаем прокрутку
-                    }
+                    PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
+                    Sequence scroll = new Sequence(finger, 0);
+                    scroll.addAction(finger.createPointerMove(Duration.ofMillis(0), PointerInput.Origin.viewport(), startX, startY));
+                    scroll.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+                    scroll.addAction(finger.createPointerMove(Duration.ofMillis(500), PointerInput.Origin.viewport(), startX, endY));
+                    scroll.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+
+                    driver.perform(Collections.singletonList(scroll));
                 }
+            }
+
+            if (!isFound) {
+                throw new RuntimeException("Кнопка 'Pay' не найдена после " + maxAttempts + " попыток.");
             }
         });
         return this;
@@ -312,13 +312,6 @@ public class CartPage {
                 ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonMakeOrder"))
         );
         placeOrderButton.click();
-        return this;
-    }
-
-    public CartPage waitForElementToBeVisible(String elementId) {
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(AppiumBy.id(elementId))
-        );
         return this;
     }
 }
