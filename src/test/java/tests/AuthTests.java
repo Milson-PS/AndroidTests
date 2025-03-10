@@ -18,7 +18,6 @@ public class AuthTests extends TestBase {
     @Test
     public void successfulAuthTest() {
         Allure.step("Начало теста успешной авторизации");
-
         authPage
                 .dontAllowButton()
                 .selectCity()
@@ -37,7 +36,7 @@ public class AuthTests extends TestBase {
                 .clearPhoneNumber()
                 .enterPhoneNumber("79351111360");
         Allure.step("Проверка успешной авторизации");
-        Assert.assertTrue(authPage.isGetSmsCodeButtonEnabled(), "Кнопка получения SMS кода должна быть включена.");
+        Assert.assertTrue(authPage.isGetSmsCodeButtonEnabled(), "Кнопка получения SMS активна.");
         authPage.clickGetSmsCodeButton().enterSmsCode("1111");
 
         Assert.assertTrue(authPage.isAuthSuccessful(), "Авторизация не выполнена, элемент информации о телефоне не найден.");

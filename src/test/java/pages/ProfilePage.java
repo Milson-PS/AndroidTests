@@ -1,14 +1,22 @@
 package pages;
 
+import base.TestBase;
 import io.appium.java_client.AppiumBy;
+import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
-import org.openqa.selenium.WebElement;
+import io.appium.java_client.android.nativekey.AndroidKey;
+import io.appium.java_client.android.nativekey.KeyEvent;
+import io.appium.java_client.touch.TapOptions;
+import io.appium.java_client.touch.WaitOptions;
+import io.appium.java_client.touch.offset.ElementOption;
+import io.appium.java_client.touch.offset.PointOption;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
-public class ProfilePage {
+public class ProfilePage extends TestBase {
     private final AndroidDriver driver;
     private final WebDriverWait wait;
 
@@ -17,7 +25,19 @@ public class ProfilePage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
     }
 
-    // Метод для закрытия возможных попапов перед взаимодействием с профилем
+    public ProfilePage clickAddAdressButton() {
+        // Ожидаем, что кнопка будет доступна для клика
+        WebElement addButton = wait.until(
+                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/add"))
+        );
+
+        // Кликаем по кнопке
+        addButton.click();
+
+        return this;
+    }
+
+
     public ProfilePage closePopupsIfNeeded() {
         try {
             WebElement closeButton = wait.until(
@@ -25,30 +45,22 @@ public class ProfilePage {
             );
             closeButton.click();
         } catch (Exception ignored) {
-            // Если попапа нет, ничего страшного — просто продолжаем
         }
         return this;
     }
 
-    // Метод для перехода в раздел "Профиль"
     public ProfilePage openProfile() {
-        closePopupsIfNeeded(); // Закрываем возможные всплывающие окна
+        closePopupsIfNeeded();
         WebElement profileTab = wait.until(
                 ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.FrameLayout[@content-desc='Профиль']"))
         );
         profileTab.click();
-
-        // Ждем, пока загрузится экран профиля
         wait.until(ExpectedConditions.presenceOfElementLocated(AppiumBy.id("ru.citilink.develop:id/profile_graph")));
-
         return this;
     }
 
-    // Метод для перехода в "Мои адреса"
     public ProfilePage openMyAddresses() {
-        // Дожидаемся, что экран "Профиль" загрузился перед кликом
         wait.until(ExpectedConditions.presenceOfElementLocated(AppiumBy.id("ru.citilink.develop:id/profile_graph")));
-
         WebElement myAddresses = wait.until(
                 ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.TextView[@resource-id='ru.citilink.develop:id/textViewLabel' and @text='Мои адреса']"))
         );
@@ -56,7 +68,6 @@ public class ProfilePage {
         return this;
     }
 
-    // Нажатие на кнопку "+"
     public ProfilePage clickAddAddressButton() {
         WebElement addButton = wait.until(
                 ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/add"))
@@ -65,31 +76,73 @@ public class ProfilePage {
         return this;
     }
 
-    // Нажатие кнопки "Сохранить"
-    public ProfilePage clickSaveButton() {
-        WebElement saveButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonSave"))
+
+
+    public void clickCourierDelivery() {
+        try {
+            // Используем XPath для поиска радиокнопки для курьерской доставки
+            WebElement courierDeliveryRadioButton = driver.findElement(By.xpath("(//android.widget.RadioButton[@resource-id='ru.citilink.develop:id/radioButtonName'])[2]"));
+
+            // Кликаем по найденному элементу
+            courierDeliveryRadioButton.click();
+
+            System.out.println("Courier delivery radio button clicked successfully.");
+
+        } catch (Exception e) {
+            System.err.println("Error clicking courier delivery radio button: " + e.getMessage());
+        }
+    }
+
+
+
+
+    public ProfilePage verifyDeliveryAddress() {
+        // Ожидаем, что текстовый элемент с нужным адресом появится на экране
+        WebElement addressElement = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(AppiumBy.xpath("//android.widget.TextView[@resource-id='ru.citilink.develop:id/textViewLabel' and @text='Ленина, д.21, к.1, ст.2А, под.3, этаж 1, кв.9']"))
         );
-        saveButton.click();
+
+        // Проверка текста в элементе
+        String actualAddress = addressElement.getText();
+        String expectedAddress = "Ленина, д.21, к.1, ст.2А, под.3, этаж 1, кв.9";
+
+        // Сравниваем фактический адрес с ожидаемым
+        if (!actualAddress.equals(expectedAddress)) {
+            throw new AssertionError("Expected address: " + expectedAddress + ", but found: " + actualAddress);
+        }
+
         return this;
     }
 
-    // Проверка ошибки "Выберите город из списка"
+    public ProfilePage clickSaveButton() {
+        // Проверяем, что кнопка видима и не перекрыта
+        WebElement saveButton = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(AppiumBy.id("ru.citilink.develop:id/buttonSave"))
+        );
+
+        // Дополнительно можно проверить, что кнопка не перекрыта
+        if (saveButton.getLocation().getY() < 0 || saveButton.getLocation().getX() < 0) {
+            throw new IllegalStateException("Save button is not visible or is offscreen.");
+        }
+
+        saveButton.click();
+
+        return this;
+    }
+
+
     public boolean isCityErrorDisplayed() {
         return isErrorDisplayed("Выберите город из списка");
     }
 
-    // Проверка ошибки "Введите улицу или выберите из списка"
     public boolean isStreetErrorDisplayed() {
         return isErrorDisplayed("Введите улицу или выберите из списка");
     }
 
-    // Проверка ошибки "Введите номер дома"
     public boolean isHouseErrorDisplayed() {
         return isErrorDisplayed("Введите номер дома");
     }
 
-    // Вспомогательный метод для проверки ошибок
     private boolean isErrorDisplayed(String errorMessage) {
         try {
             WebElement errorElement = wait.until(
@@ -102,25 +155,77 @@ public class ProfilePage {
         }
     }
 
-    // Ввод города
     public ProfilePage enterCity(String city) {
+        // Вводим текст в поле города
         enterText("ru.citilink.develop:id/autoCompleteTextViewCity", city);
+
+        // Ждем появления выпадающего списка
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5)); // Увеличиваем таймаут до 10 секунд
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//android.widget.ListView")));
+
+            // Выбираем нужный город из списка
+            String xpath = String.format("//android.widget.TextView[@text='%s']", city);
+            WebElement cityOption = driver.findElement(By.xpath(xpath));
+            cityOption.click();
+        } catch (TimeoutException e) {
+            // Если список не появился, нажимаем Enter
+            driver.pressKey(new KeyEvent(AndroidKey.ENTER));
+        }
+
         return this;
     }
-
-    // Ввод улицы
     public ProfilePage enterStreet(String street) {
         enterText("ru.citilink.develop:id/autoCompleteTextViewStreet", street);
         return this;
     }
 
-    // Ввод номера дома
     public ProfilePage enterHouse(String house) {
         enterText("ru.citilink.develop:id/editTextHouse", house);
         return this;
     }
 
-    // Вспомогательный метод для ввода текста в поля
+
+    public ProfilePage enterCorpus(String corpus) {
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            WebElement corpusField = wait.until(ExpectedConditions.presenceOfElementLocated(
+                    AppiumBy.id("ru.citilink.develop:id/editTextCorpus")
+            ));
+            corpusField.clear();
+            corpusField.sendKeys(corpus);
+        } catch (StaleElementReferenceException e) {
+            // Если элемент устарел, находим его снова
+            WebElement corpusField = driver.findElement(AppiumBy.id("ru.citilink.develop:id/editTextCorpus"));
+            corpusField.clear();
+            corpusField.sendKeys(corpus);
+        } catch (Exception e) {
+            System.out.println("Не удалось ввести текст в поле 'Корпус': " + e.getMessage());
+            throw e;
+        }
+        return this;
+    }
+
+    public ProfilePage enterBuilding(String building) {
+        enterText("ru.citilink.develop:id/editTextBuilding", building);
+        return this;
+    }
+
+    public ProfilePage enterPorch(String porch) {
+        enterText("ru.citilink.develop:id/editTextPorch", porch);
+        return this;
+    }
+
+    public ProfilePage enterFloor(String floor) {
+        enterText("ru.citilink.develop:id/editTextFloor", floor);
+        return this;
+    }
+
+    public ProfilePage enterFlat(String flat) {
+        enterText("ru.citilink.develop:id/editTextFlat", flat);
+        return this;
+    }
+
     private void enterText(String resourceId, String text) {
         WebElement field = wait.until(
                 ExpectedConditions.elementToBeClickable(AppiumBy.id(resourceId))
@@ -129,7 +234,6 @@ public class ProfilePage {
         field.sendKeys(text);
     }
 
-    // Проверка, что адрес сохранен
     public boolean isAddressSaved() {
         try {
             WebElement addressArea = wait.until(

@@ -6,6 +6,7 @@ import io.qameta.allure.Allure;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.interactions.PointerInput;
 import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -106,6 +107,17 @@ public class CartPage {
         });
         return this;
     }
+
+    public CartPage selectDeliveryMethod() {
+        WebElement deliveryButton = wait.until(
+                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonContentOrderingDelivery"))
+        );
+
+        new Actions(driver).moveToElement(deliveryButton).click().perform();
+
+        return this;
+    }
+
 
 
     public CartPage scrollToPayButton() {

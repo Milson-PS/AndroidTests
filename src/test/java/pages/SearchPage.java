@@ -48,4 +48,17 @@ public class SearchPage extends BasePage { // Наследуемся от BasePa
         homeButton.click();
         return this;
     }
+
+    // Метод для нажатия на кнопку "Возврат в профиль"
+    public SearchPage clickBackToProfileButton() {
+        // Ожидаем, что кнопка возврата будет доступна для клика
+        WebElement backButton = wait.until(
+                ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.ImageButton"))
+        );
+
+        // Кликаем по кнопке
+        backButton.click();
+
+        return this;
+    }
 }
