@@ -27,16 +27,16 @@ public class AddAddressTests extends TestBase {
     public void testAddAddress() {
         try {
             Allure.step("1. Авторизация в системе");
-            authPage.loginAsDefaultUser(); // Используем метод авторизации
+            authPage.loginAsDefaultUser();
 
             Allure.step("2. Переход в 'Мои адреса'");
-            profilePage.openMyAddresses(); // Открытие профиля и переход в "Мои адреса"
+            profilePage.openMyAddresses();
 
             Allure.step("3. Нажатие кнопки '+' для добавления нового адреса");
-            profilePage.clickAddAddressButton(); // Клик по кнопке добавления адреса
+            profilePage.clickAddAddressButton();
 
             Allure.step("4. Попытка сохранить адрес с пустой формой");
-            profilePage.clickSaveButton(); // Попытка сохранить без ввода данных
+            profilePage.clickSaveButton();
 
             Allure.step("5. Проверка ошибок для обязательных полей");
             Assert.assertTrue(profilePage.isCityErrorDisplayed(), "Ошибка 'Выберите город из списка' не отображается");
@@ -49,7 +49,7 @@ public class AddAddressTests extends TestBase {
                     .enterHouse("21");
 
             Allure.step("7. Сохранение адреса");
-            profilePage.clickSaveButton(); // Сохранение заполненного адреса
+            profilePage.clickSaveButton();
 
             Allure.step("8. Проверка, что адрес успешно сохранен");
             Assert.assertTrue(profilePage.isAddressSaved(), "Адрес не был сохранен");
@@ -84,10 +84,10 @@ public class AddAddressTests extends TestBase {
 
             Allure.step("15. Оформление заказа");
             cartPage.proceedToCheckout();
-            cartPage.continueAsGuest();
 
             Allure.step("16. Выбор доставки");
-            profilePage.clickCourierDelivery();
+            profilePage.selectDeliveryButton();
+            profilePage.clickDeliveryButton();
 
 
             Allure.step("18. Проверка адреса доставки");
@@ -99,10 +99,6 @@ public class AddAddressTests extends TestBase {
         }
     }
 }
-
-
-
-
 
 
 
