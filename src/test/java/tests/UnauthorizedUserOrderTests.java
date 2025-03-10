@@ -96,7 +96,7 @@ public class UnauthorizedUserOrderTests extends TestBase {
 
             Allure.step("20. Нажатие кнопки оплаты");
             cartPage.clickPayButton(); // Нажимаем на кнопку "Pay"
-        //    cartPage.scrollToAndClickPayButton();
+            //    cartPage.scrollToAndClickPayButton();
             Allure.step("21. Ожидание успешного завершения оплаты");
             boolean isSuccess = cartPage.waitForSuccessPage();
             if (isSuccess) {

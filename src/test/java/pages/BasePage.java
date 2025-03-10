@@ -17,7 +17,7 @@ public class BasePage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
     }
 
-    // Метод для нажатия на кнопку поиска
+
     public BasePage clickSearchButton() {
         WebElement searchButton = wait.until(
                 ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/toolbar"))
@@ -26,7 +26,7 @@ public class BasePage {
         return this;
     }
 
-    // Метод для перехода на главную страницу
+
     public BasePage goToHomePage() {
         WebElement homeButton = wait.until(
                 ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.FrameLayout[@content-desc='Главная']"))

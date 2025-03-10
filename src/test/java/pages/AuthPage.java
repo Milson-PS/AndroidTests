@@ -1,4 +1,5 @@
 package pages;
+
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import org.openqa.selenium.WebElement;
@@ -52,7 +53,6 @@ public class AuthPage {
 
         return this;
     }
-
 
 
     public AuthPage openProfileTab() {
@@ -116,16 +116,6 @@ public class AuthPage {
         return phoneInfoElement.isDisplayed();
     }
 
-    public boolean isPhoneNumberFieldDisplayed() {
-        try {
-            WebElement phoneField = wait.until(
-                    ExpectedConditions.visibilityOfElementLocated(AppiumBy.id("ru.citilink.develop:id/editTextAuthPhone"))
-            );
-            return phoneField.isDisplayed();
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
     public boolean isGetSmsCodeButtonEnabled() {
         try {
@@ -133,28 +123,6 @@ public class AuthPage {
                     ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonAuthPhoneGetCode"))
             );
             return getCodeButton.isEnabled();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public boolean isSmsCodeFieldDisplayed() {
-        try {
-            WebElement smsField = wait.until(
-                    ExpectedConditions.visibilityOfElementLocated(AppiumBy.id("ru.citilink.develop:id/editTextAuthCode"))
-            );
-            return smsField.isDisplayed();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public boolean isConfirmButtonEnabled() {
-        try {
-            WebElement confirmButton = wait.until(
-                    ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonAuthConfirm"))
-            );
-            return confirmButton.isEnabled();
         } catch (Exception e) {
             return false;
         }
@@ -179,6 +147,7 @@ public class AuthPage {
         phoneField.sendKeys("+7");
         return this;
     }
+
     public AuthPage loginAsDefaultUser() {
         dontAllowButton()
                 .selectCity()

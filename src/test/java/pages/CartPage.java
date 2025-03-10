@@ -24,7 +24,7 @@ public class CartPage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(60)); // Увеличен таймаут до 60 секунд
     }
 
-    // Переключение на контекст WEBVIEW
+
     public void switchToWebViewContext() {
         for (String context : driver.getContextHandles()) {
             if (context.contains("WEBVIEW")) {
@@ -34,7 +34,7 @@ public class CartPage {
         }
     }
 
-    // Проверка текста на форме Yoomoney
+
     public boolean checkYoomoneyText() {
         try {
             Allure.step("Проверка текста на форме Yoomoney");
@@ -107,17 +107,6 @@ public class CartPage {
         });
         return this;
     }
-
-    public CartPage selectDeliveryMethod() {
-        WebElement deliveryButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonContentOrderingDelivery"))
-        );
-
-        new Actions(driver).moveToElement(deliveryButton).click().perform();
-
-        return this;
-    }
-
 
 
     public CartPage scrollToPayButton() {

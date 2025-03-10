@@ -5,5 +5,12 @@
 }
 
 
+
 - Запустить Appium Server
 appium server --base-path /wd/hub
+
+Запуск  TestNG
+mvn test -Dsurefire.suiteXmlFiles=src/test/resources/testng.xml
+
+Запуск Allure
+allure serve target/allure-results
