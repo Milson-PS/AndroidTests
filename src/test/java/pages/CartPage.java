@@ -3,27 +3,21 @@ package pages;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import io.qameta.allure.Allure;
+import locators.CartPageLocators;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.interactions.PointerInput;
 import org.openqa.selenium.interactions.Sequence;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.Collections;
 
-public class CartPage {
-    private final AndroidDriver driver;
-    private final WebDriverWait wait;
+public class CartPage extends BasePage {
 
     public CartPage(AndroidDriver driver) {
-        this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(60)); // Увеличен таймаут до 60 секунд
+        super(driver);
     }
-
 
     public void switchToWebViewContext() {
         for (String context : driver.getContextHandles()) {
@@ -34,15 +28,10 @@ public class CartPage {
         }
     }
 
-
     public boolean checkYoomoneyText() {
         try {
             Allure.step("Проверка текста на форме Yoomoney");
-            WebElement yoomoneyText = wait.until(
-                    ExpectedConditions.visibilityOfElementLocated(
-                            AppiumBy.xpath("(//android.view.View[@content-desc='yoomoney'])[2]/android.widget.Image")
-                    )
-            );
+            WebElement yoomoneyText = waitForElement(CartPageLocators.YOOMONEY_TEXT);
             return yoomoneyText.isDisplayed();
         } catch (Exception e) {
             System.out.println("Ошибка при проверке текста Yoomoney: " + e.getMessage());
@@ -50,55 +39,28 @@ public class CartPage {
         }
     }
 
-    // Ввод данных карты
     public CartPage enterCardDetails(String cardNumber, String expMonth, String expYear, String cvc) {
         Allure.step("Ввод данных карты", () -> {
-            // Ввод номера карты
-            WebElement cardNumberField = wait.until(
-                    ExpectedConditions.elementToBeClickable(
-                            AppiumBy.xpath("//android.view.View[@resource-id='root']/android.view.View[2]/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[2]/android.view.View/android.widget.EditText")
-                    )
-            );
+            WebElement cardNumberField = waitForElement(CartPageLocators.CARD_NUMBER_FIELD);
             cardNumberField.sendKeys(cardNumber);
 
-            // Ввод месяца
-            WebElement expMonthField = wait.until(
-                    ExpectedConditions.elementToBeClickable(
-                            AppiumBy.xpath("//android.view.View[@resource-id='root']/android.view.View[2]/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[4]/android.view.View/android.widget.EditText")
-                    )
-            );
+            WebElement expMonthField = waitForElement(CartPageLocators.EXP_MONTH_FIELD);
             expMonthField.sendKeys(expMonth);
 
-            // Ввод года
-            WebElement expYearField = wait.until(
-                    ExpectedConditions.elementToBeClickable(
-                            AppiumBy.xpath("//android.view.View[@resource-id='root']/android.view.View[2]/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[5]/android.view.View/android.widget.EditText")
-                    )
-            );
+            WebElement expYearField = waitForElement(CartPageLocators.EXP_YEAR_FIELD);
             expYearField.sendKeys(expYear);
 
-            // Ввод CVC
-            WebElement cvcField = wait.until(
-                    ExpectedConditions.elementToBeClickable(
-                            AppiumBy.xpath("//android.view.View[@resource-id='root']/android.view.View[2]/android.view.View[4]/android.view.View[2]/android.view.View[1]/android.view.View[7]/android.widget.EditText")
-                    )
-            );
+            WebElement cvcField = waitForElement(CartPageLocators.CVC_FIELD);
             cvcField.sendKeys(cvc);
         });
         return this;
     }
 
-
     public CartPage clickPayButton() {
         Allure.step("Нажатие кнопки оплаты", () -> {
             try {
-                WebElement payButton = wait.until(
-                        ExpectedConditions.elementToBeClickable(
-                                AppiumBy.xpath("//android.widget.Button[contains(@text, 'Pay')]")
-                        )
-                );
+                clickElement(CartPageLocators.PAY_BUTTON);
                 Thread.sleep(1000); // Пауза для уверенности
-                payButton.click();
                 System.out.println("Кнопка 'Pay' успешно нажата.");
             } catch (Exception e) {
                 System.out.println("Ошибка при нажатии кнопки 'Pay': " + e.getMessage());
@@ -108,7 +70,6 @@ public class CartPage {
         return this;
     }
 
-
     public CartPage scrollToPayButton() {
         Allure.step("Прокрутка до кнопки оплаты", () -> {
             int maxAttempts = 5;
@@ -117,7 +78,7 @@ public class CartPage {
 
             while (!isFound && attempts < maxAttempts) {
                 try {
-                    WebElement payButton = driver.findElement(AppiumBy.xpath("//android.widget.Button[contains(@text, 'Pay')]"));
+                    WebElement payButton = driver.findElement(CartPageLocators.PAY_BUTTON);
                     if (payButton.isDisplayed()) {
                         isFound = true;
                         System.out.println("Кнопка 'Pay' найдена после прокрутки.");
@@ -149,34 +110,25 @@ public class CartPage {
         return this;
     }
 
-
-    // Ожидание успешного завершения оплаты
     public boolean waitForSuccessPage() {
         return Allure.step("Ожидание успешного завершения оплаты", () -> {
-            WebElement successText = wait.until(
-                    ExpectedConditions.visibilityOfElementLocated(
-                            AppiumBy.xpath("//android.widget.TextView[@text='Success']")
-                    )
-            );
+            WebElement successText = waitForElement(CartPageLocators.SUCCESS_TEXT);
             return successText.isDisplayed();
         });
     }
 
-    // Ожидание загрузки страницы оплаты
     public CartPage waitForPaymentPageToLoad() {
         try {
             Allure.step("Ожидание загрузки страницы оплаты...");
-            // Просто ждем 10 секунд (или другое время, которое вам нужно)
             Thread.sleep(10000); // 10 секунд
             System.out.println("Страница оплаты загружена.");
         } catch (InterruptedException e) {
             System.out.println("Ошибка при ожидании загрузки страницы оплаты: " + e.getMessage());
-            Thread.currentThread().interrupt(); // Восстановление прерванного статуса
+            Thread.currentThread().interrupt();
         }
         return this;
     }
 
-    // Остальные методы из вашего исходного кода
     private void scrollToEmailField() {
         driver.findElement(AppiumBy.androidUIAutomator(
                 "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().resourceId(\"ru.citilink.develop:id/editTextOrderingPaymentEmail\"))"
@@ -184,108 +136,73 @@ public class CartPage {
     }
 
     public CartPage goToCart() {
-        WebElement cartButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonProductItemInCartCart"))
-        );
-        cartButton.click();
+        clickElement(CartPageLocators.CART_BUTTON);
         return this;
     }
 
     public CartPage proceedToCheckout() {
-        WebElement checkoutButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonMakeOrder"))
-        );
-        checkoutButton.click();
+        clickElement(CartPageLocators.CHECKOUT_BUTTON);
         return this;
     }
 
     public CartPage continueAsGuest() {
-        WebElement guestButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonGuestContinue"))
-        );
-        guestButton.click();
+        clickElement(CartPageLocators.GUEST_BUTTON);
         return this;
     }
 
     public CartPage selectPickupAddress() {
-        WebElement pickupAddressButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonContentOrderingDeliverySelfAddress"))
-        );
-        pickupAddressButton.click();
+        clickElement(CartPageLocators.PICKUP_ADDRESS_BUTTON);
         return this;
     }
 
     public CartPage clickListButton() {
-        WebElement listButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.LinearLayout[@content-desc='Список']"))
-        );
-        listButton.click();
+        clickElement(CartPageLocators.LIST_BUTTON);
         return this;
     }
 
     public CartPage selectPickupPoint() {
-        WebElement pickupPointButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.xpath("(//android.widget.Button[@resource-id='ru.citilink.develop:id/buttonSetDeliverySelf'])[1]"))
-        );
-        pickupPointButton.click();
+        clickElement(CartPageLocators.PICKUP_POINT_BUTTON);
         return this;
     }
 
     public CartPage selectBankCardPayment() {
-        WebElement bankCardRadioButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.xpath("(//android.widget.RadioButton[@resource-id='ru.citilink.develop:id/radioButtonName'])[5]"))
-        );
-        bankCardRadioButton.click();
+        clickElement(CartPageLocators.BANK_CARD_RADIO_BUTTON);
         return this;
     }
 
     public CartPage enterEmail(String email) {
         scrollToEmailField();
-        WebElement emailField = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/editTextOrderingPaymentEmail"))
-        );
+        WebElement emailField = waitForElement(CartPageLocators.EMAIL_FIELD);
         emailField.clear();
         emailField.sendKeys(email);
         return this;
     }
 
     public CartPage clickAddContactDataButton() {
-        WebElement addContactButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonContentOrderingContactData"))
-        );
-        addContactButton.click();
+        clickElement(CartPageLocators.ADD_CONTACT_BUTTON);
         return this;
     }
 
     public CartPage enterFirstName(String name) {
-        WebElement nameField = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/editTextName"))
-        );
+        WebElement nameField = waitForElement(CartPageLocators.NAME_FIELD);
         nameField.sendKeys(name);
         return this;
     }
 
     public CartPage enterLastName(String surname) {
-        WebElement surnameField = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/editTextSurname"))
-        );
+        WebElement surnameField = waitForElement(CartPageLocators.SURNAME_FIELD);
         surnameField.sendKeys(surname);
         return this;
     }
 
     public CartPage enterPhoneNumber(String phone) {
-        WebElement phoneField = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/editTextPhone"))
-        );
+        WebElement phoneField = waitForElement(CartPageLocators.PHONE_FIELD);
         phoneField.sendKeys(phone);
         return this;
     }
 
     public CartPage clickSaveContactData() {
-        WebElement saveButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonSave"))
-        );
-        saveButton.click();
+        clickElement(CartPageLocators.SAVE_BUTTON);
         return this;
     }
 
@@ -295,24 +212,14 @@ public class CartPage {
                         "new UiSelector().resourceId(\"ru.citilink.develop:id/radioButtonName\"))"
         ));
 
-        WebElement radioButton = wait.until(
-                ExpectedConditions.elementToBeClickable(
-                        AppiumBy.xpath(
-                                "//android.widget.RadioButton[@resource-id='ru.citilink.develop:id/radioButtonName']"
-                        )
-                )
-        );
-
+        WebElement radioButton = waitForElement(CartPageLocators.RADIO_BUTTON);
         System.out.println("Найден элемент: " + radioButton.getText());
         radioButton.click();
         return this;
     }
 
     public CartPage placeOrder() {
-        WebElement placeOrderButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonMakeOrder"))
-        );
-        placeOrderButton.click();
+        clickElement(CartPageLocators.PLACE_ORDER_BUTTON);
         return this;
     }
 }

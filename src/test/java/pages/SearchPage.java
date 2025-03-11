@@ -1,28 +1,21 @@
 package pages;
 
-import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
+import locators.SearchPageLocators;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
-
-public class SearchPage extends BasePage { // Наследуемся от BasePage
+public class SearchPage extends BasePage {
 
     public SearchPage(AndroidDriver driver) {
-        super(driver); // Вызов конструктора родительского класса
+        super(driver);
     }
 
-    // Метод для поиска товара
     public SearchPage searchProduct(String productId) {
         // Нажимаем на кнопку поиска
         clickSearchButton();
 
         // Клик по полю поиска
-        WebElement searchInput = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/editTextSearchToolbar"))
-        );
+        WebElement searchInput = waitForElement(SearchPageLocators.SEARCH_INPUT);
         searchInput.click();
 
         // Очистка поля (если нужно)
@@ -32,33 +25,19 @@ public class SearchPage extends BasePage { // Наследуемся от BasePa
         searchInput.sendKeys(productId);
 
         // Ожидание появления результатов поиска
-        WebElement firstProduct = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//androidx.recyclerview.widget.RecyclerView[@resource-id='ru.citilink.develop:id/recyclerViewSuggestedProducts']/android.view.ViewGroup[1]"))
-        );
+        WebElement firstProduct = waitForElement(SearchPageLocators.FIRST_PRODUCT);
         firstProduct.click();
 
         return this;
     }
 
-    // Метод для перехода на главную страницу
     public SearchPage goToHomePage() {
-        WebElement homeButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.FrameLayout[@content-desc='Главная']"))
-        );
-        homeButton.click();
+        clickElement(SearchPageLocators.HOME_BUTTON);
         return this;
     }
 
-    // Метод для нажатия на кнопку "Возврат в профиль"
     public SearchPage clickBackToProfileButton() {
-        // Ожидаем, что кнопка возврата будет доступна для клика
-        WebElement backButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.ImageButton"))
-        );
-
-        // Кликаем по кнопке
-        backButton.click();
-
+        clickElement(SearchPageLocators.BACK_BUTTON);
         return this;
     }
 }

@@ -2,79 +2,50 @@ package pages;
 
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
+import locators.AuthPageLocators;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 
-import java.time.Duration;
-
-public class AuthPage {
-    private final AndroidDriver driver;
-    private final WebDriverWait wait;
+public class AuthPage extends BasePage {
 
     public AuthPage(AndroidDriver driver) {
-        this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        super(driver);
     }
 
     public AuthPage dontAllowButton() {
-        WebElement clickAdmonitionsButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.Button[@resource-id='com.android.permissioncontroller:id/permission_deny_button']"))
-        );
-        clickAdmonitionsButton.click();
+        clickElement(AuthPageLocators.DONT_ALLOW_BUTTON);
         return this;
     }
 
-
     public AuthPage selectCity() {
-        // Ожидаем, пока кнопка "Нет" (android:id/button2) станет кликабельной
-        WebElement noButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.Button[@resource-id='android:id/button2']"))
-        );
-        // Нажимаем на кнопку "Нет"
-        noButton.click();
+        clickElement(AuthPageLocators.NO_BUTTON);
 
-        // Ожидаем, пока появится список городов (RecyclerView с городами)
-        WebElement cityList = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(AppiumBy.xpath("//androidx.recyclerview.widget.RecyclerView[@resource-id='ru.citilink.develop:id/recyclerViewSelectCity']"))
-        );
+        WebElement cityList = waitForElement(AuthPageLocators.CITY_LIST);
+        WebElement moscowCity = cityList.findElement(AuthPageLocators.MOSCOW_CITY);
 
-        // Ищем элемент с текстом "Москва"
-        WebElement moscowCity = cityList.findElement(AppiumBy.xpath("//android.widget.LinearLayout//android.widget.TextView[@text='Москва']"));
         if (moscowCity != null) {
-            // Нажимаем на "Москва"
             moscowCity.click();
         } else {
-            // Если не найдено, выводим ошибку
             System.out.println("Город Москва не найден!");
         }
 
         return this;
     }
 
-
     public AuthPage openProfileTab() {
-        WebElement profileTab = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.FrameLayout[@content-desc='Профиль']"))
-        );
-        profileTab.click();
+        clickElement(AuthPageLocators.PROFILE_TAB);
         return this;
     }
 
     public AuthPage clickLoginButton() {
-        WebElement loginButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonProfileGuestHeaderAuth"))
-        );
-        loginButton.click();
+        clickElement(AuthPageLocators.LOGIN_BUTTON);
         return this;
     }
 
     public AuthPage enterPhoneNumber(String phoneNumber) {
-        WebElement phoneField = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/editTextAuthPhone"))
-        );
+        WebElement phoneField = waitForElement(AuthPageLocators.PHONE_FIELD);
         phoneField.click();
         phoneField.clear();
         phoneField.sendKeys(phoneNumber);
@@ -82,46 +53,36 @@ public class AuthPage {
     }
 
     public AuthPage clearPhoneNumber() {
-        WebElement phoneField = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/editTextAuthPhone"))
-        );
+        WebElement phoneField = waitForElement(AuthPageLocators.PHONE_FIELD);
         phoneField.clear();
         return this;
     }
 
     public AuthPage clickGetSmsCodeButton() {
-        WebElement getCodeButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonAuthPhoneGetCode"))
-        );
-        getCodeButton.click();
+        clickElement(AuthPageLocators.GET_CODE_BUTTON);
         return this;
     }
 
     public AuthPage enterSmsCode(String code) {
         for (int i = 0; i < code.length(); i++) {
-            WebElement smsField = wait.until(
-                    ExpectedConditions.elementToBeClickable(AppiumBy.xpath("(//android.widget.FrameLayout[@resource-id='ru.citilink.develop:id/cellContainer'])[" + (i + 1) + "]"))
-            );
+            By smsFieldLocator = AppiumBy.xpath(String.format("(//android.widget.FrameLayout[@resource-id='ru.citilink.develop:id/cellContainer'])[%d]", i + 1));
+            WebElement smsField = waitForElement(smsFieldLocator);
 
             Actions actions = new Actions(driver);
-            actions.sendKeys(smsField, Character.toString(code.charAt(i))).perform();
+            actions.moveToElement(smsField).click().sendKeys(Character.toString(code.charAt(i))).perform();
         }
         return this;
     }
 
+
     public boolean isAuthSuccessful() {
-        WebElement phoneInfoElement = wait.until(
-                ExpectedConditions.presenceOfElementLocated(AppiumBy.xpath("//android.widget.TextView[@resource-id='ru.citilink.develop:id/textViewProfilePhoneInfoCallInfo']"))
-        );
+        WebElement phoneInfoElement = waitForElement(AuthPageLocators.PHONE_INFO_ELEMENT);
         return phoneInfoElement.isDisplayed();
     }
 
-
     public boolean isGetSmsCodeButtonEnabled() {
         try {
-            WebElement getCodeButton = wait.until(
-                    ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/buttonAuthPhoneGetCode"))
-            );
+            WebElement getCodeButton = waitForElement(AuthPageLocators.GET_CODE_BUTTON);
             return getCodeButton.isEnabled();
         } catch (Exception e) {
             return false;
@@ -129,19 +90,11 @@ public class AuthPage {
     }
 
     public AuthPage pastePhoneNumber(String phoneNumber) {
-        WebElement phoneField = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/editTextAuthPhone"))
-        );
-        phoneField.click();
-        phoneField.clear();
-        phoneField.sendKeys(phoneNumber);
-        return this;
+        return enterPhoneNumber(phoneNumber);
     }
 
     public AuthPage clearPhoneNumberButKeepPlus7() {
-        WebElement phoneField = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/editTextAuthPhone"))
-        );
+        WebElement phoneField = waitForElement(AuthPageLocators.PHONE_FIELD);
         phoneField.click();
         phoneField.clear();
         phoneField.sendKeys("+7");
@@ -161,5 +114,4 @@ public class AuthPage {
         Assert.assertTrue(isAuthSuccessful(), "Авторизация не выполнена");
         return this;
     }
-
 }

@@ -1,7 +1,7 @@
 package pages;
 
-import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -17,21 +17,24 @@ public class BasePage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
     }
 
+    // Универсальный метод для клика по элементу
+    protected void clickElement(By by) {
+        WebElement element = wait.until(ExpectedConditions.elementToBeClickable(by));
+        element.click();
+    }
+
+    // Универсальный метод для ожидания элемента
+    protected WebElement waitForElement(By by) {
+        return wait.until(ExpectedConditions.presenceOfElementLocated(by));
+    }
 
     public BasePage clickSearchButton() {
-        WebElement searchButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.id("ru.citilink.develop:id/toolbar"))
-        );
-        searchButton.click();
+        clickElement(By.id("ru.citilink.develop:id/toolbar"));
         return this;
     }
 
-
     public BasePage goToHomePage() {
-        WebElement homeButton = wait.until(
-                ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.FrameLayout[@content-desc='Главная']"))
-        );
-        homeButton.click();
+        clickElement(By.xpath("//android.widget.FrameLayout[@content-desc='Главная']"));
         return this;
     }
 }
