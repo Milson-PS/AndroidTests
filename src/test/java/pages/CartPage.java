@@ -120,7 +120,7 @@ public class CartPage extends BasePage {
     public CartPage waitForPaymentPageToLoad() {
         try {
             Allure.step("Ожидание загрузки страницы оплаты...");
-            Thread.sleep(10000); // 10 секунд
+            Thread.sleep(15000); // 15 секунд
             System.out.println("Страница оплаты загружена.");
         } catch (InterruptedException e) {
             System.out.println("Ошибка при ожидании загрузки страницы оплаты: " + e.getMessage());

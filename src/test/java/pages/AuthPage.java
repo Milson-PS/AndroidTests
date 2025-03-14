@@ -107,7 +107,7 @@ public class AuthPage extends BasePage {
                 .openProfileTab()
                 .clickLoginButton()
                 .clearPhoneNumber()
-                .enterPhoneNumber("79351111360")
+                .enterPhoneNumber("79351111344")
                 .clickGetSmsCodeButton()
                 .enterSmsCode("1111");
 

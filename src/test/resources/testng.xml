@@ -1,8 +1,19 @@
-<suite name="AppiumTestSuite" parallel="false">
-    <test name="SearchTests">
+<suite name="AppiumTestSuite" parallel="tests" thread-count="2">
+    <test name="SearchTestsOnPixel6a">
+        <parameter name="deviceName" value="Pixel 6a API 34"/>
+        <parameter name="platformVersion" value="14.0"/>
+        <parameter name="udid" value="emulator-5554"/>
+        <classes>
+            <class name="tests.AddAddressTests"/>
+        </classes>
+    </test>
+
+    <test name="SearchTestsOnPixel7a">
+        <parameter name="deviceName" value="Pixel 7a API 34"/>
+        <parameter name="platformVersion" value="14.0"/>
+        <parameter name="udid" value="emulator-5556"/>
         <classes>
             <class name="tests.AuthTests"/>
-            <class name="tests.AddAddressTests"/>
             <class name="tests.UnauthorizedUserOrderTests"/>
         </classes>
     </test>

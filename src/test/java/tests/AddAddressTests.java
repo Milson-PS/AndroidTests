@@ -44,7 +44,7 @@ public class AddAddressTests extends TestBase {
             Assert.assertTrue(profilePage.isHouseErrorDisplayed(), "Ошибка 'Введите номер дома' не отображается");
 
             Allure.step("6. Заполнение обязательных полей");
-            profilePage.enterCity("Москва")
+            profilePage.enterCity("Борки")
                     .enterStreet("Ленина")
                     .enterHouse("21");
 
@@ -56,7 +56,7 @@ public class AddAddressTests extends TestBase {
 
             Allure.step("9. Заполнение всех необязательных полей");
             profilePage.clickAddAddressButton()
-                    .enterCity("Москва")
+                    .enterCity("Борки")
                     .enterStreet("Ленина")
                     .enterHouse("21")
                     .enterCorpus("1")

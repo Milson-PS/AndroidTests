@@ -5,6 +5,7 @@ import io.appium.java_client.android.AndroidDriver;
 import io.qameta.allure.Allure;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Parameters;
 
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
@@ -13,9 +14,12 @@ public class TestBase {
     protected AndroidDriver driver;
 
     @BeforeMethod
-    public void setUp() {
-        driver = LocalDriverProvider.createDriver();
-        // Запуск видео записи
+    @Parameters({"deviceName", "platformVersion", "udid"})
+    public void setUp(String deviceName, String platformVersion, String udid) {
+        System.out.println("Setting up driver for device: " + deviceName);
+        System.out.println("UDID: " + udid);
+
+        driver = LocalDriverProvider.createDriver(deviceName, platformVersion, udid);
         driver.startRecordingScreen();
     }
 
@@ -30,5 +34,4 @@ public class TestBase {
             driver.quit();
         }
     }
-
 }
